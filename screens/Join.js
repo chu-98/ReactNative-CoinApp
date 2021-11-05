@@ -1,6 +1,8 @@
 import React, { useRef, useState } from "react";
 import styled from "styled-components";
 import { BLACK_COLOR } from "../assets/colors/colors";
+import auth from "@react-native-firebase/auth";
+import { ActivityIndicator } from "react-native";
 
 const Container = styled.View`
   background-color: ${BLACK_COLOR};
@@ -35,11 +37,35 @@ const BtnText = styled.Text`
 const Join = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const passwordInput = useRef();
-  const goNext = () => {
+  const onSubmitEmailEditing = () => {
     passwordInput.current.focus();
   };
+  const onSubmitPasswordEditing = async () => {
+    if (email === "" || password === "") {
+      return Alert.alert("Fill in the form.");
+    }
+    if (loading) {
+      return;
+    }
+    setLoading(true);
+    try {
+      const userCredential = await auth().createUserWithEmailAndPassword(
+        email,
+        password
+      );
+      console.log(userCredential);
+    } catch (e) {
+      switch (e.code) {
+        case "auth/weak-password": {
+          Alert.alert("Write a stronger password!");
+        }
+      }
+    }
+  };
+
   return (
     <Container>
       <TextInput
@@ -51,7 +77,7 @@ const Join = () => {
         value={email}
         returnKeyType="next"
         onChangeText={text => setEmail(text)}
-        onSubmitEditing={goNext}
+        onSubmitEditing={onSubmitEmailEditing}
       />
       <TextInput
         ref={passwordInput}
@@ -61,10 +87,21 @@ const Join = () => {
         value={password}
         returnKeyType="done"
         onChangeText={text => setPassword(text)}
+        onSubmitEditing={onSubmitPasswordEditing}
       />
-      <Btn>
-        <BtnText>Create Account</BtnText>
+      <Btn onPress={onSubmitPasswordEditing}>
+        {loading ? (
+          <ActivityIndicator color="white" />
+        ) : (
+          <BtnText>Create Account</BtnText>
+        )}
       </Btn>
+      <GoogleSigninButton
+        style={{ width: 192, height: 48 }}
+        size={GoogleSigninButton.Size.Wide}
+        color={GoogleSigninButton.Color.Dark}
+        onPress={this._signIn}
+      />
     </Container>
   );
 };
