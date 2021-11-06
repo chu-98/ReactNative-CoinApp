@@ -1,5 +1,6 @@
-import React, { useRef, useEffect, useReducer } from "react";
-import { Animated, View } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import React, { useRef, useEffect } from "react";
+import { Animated, TouchableOpacity, View } from "react-native";
 import styled from "styled-components";
 
 const Wrapper = styled(Animated.createAnimatedComponent(View))`
@@ -13,14 +14,15 @@ const CoinName = styled.Text`
   font-weight: 600;
   font-size: 16px;
 `;
-const Icon = styled.Image`
+export const Icon = styled.Image`
   border-radius: 20px;
   width: 40px;
   height: 40px;
   margin-bottom: 10px;
 `;
 
-const Coin = ({ symbol, index }) => {
+const Coin = ({ symbol, index, id }) => {
+  const navigation = useNavigation();
   const opacity = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     Animated.spring(opacity, {
@@ -35,14 +37,19 @@ const Coin = ({ symbol, index }) => {
   });
 
   return (
-    <Wrapper style={{ flex: 0.31, opacity, transform: [{ scale }] }}>
-      <Icon
-        source={{
-          url: `https://cryptoicon-api.vercel.app/api/icon/${symbol.toLowerCase()}`,
-        }}
-      />
-      <CoinName>{symbol}</CoinName>
-    </Wrapper>
+    <TouchableOpacity
+      style={{ flex: 0.31 }}
+      onPress={() => navigation.navigate("Detail", { symbol, id })}
+    >
+      <Wrapper style={{ opacity, transform: [{ scale }] }}>
+        <Icon
+          source={{
+            url: `https://cryptoicon-api.vercel.app/api/icon/${symbol.toLowerCase()}`,
+          }}
+        />
+        <CoinName>{symbol}</CoinName>
+      </Wrapper>
+    </TouchableOpacity>
   );
 };
 
